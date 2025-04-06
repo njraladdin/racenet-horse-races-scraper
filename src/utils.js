@@ -30,7 +30,7 @@ const convertToCsv = (data) => {
 
 // Global configuration object
 const globalConfig = {
-  SAVE_DEBUG_OUTPUT: false, // Control whether to save debug files to test_output
+  SAVE_DEBUG_OUTPUT: true, // Control whether to save debug files to test_output
   SAVE_JSON: true,          // Whether to save JSON output data
   SAVE_CSV: true,           // Whether to save CSV output data
   SAVE_RAW_DATA: false      // Whether to save raw API response data

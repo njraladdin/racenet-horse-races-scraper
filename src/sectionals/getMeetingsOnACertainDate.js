@@ -16,10 +16,160 @@ const getMeetingsOnACertainDate = async (date) => {
   // Use current date if none provided
   const targetDate = date || new Date().toISOString().split('T')[0];
   
+  // Define the GraphQL query
+  const query = `
+  query meetingsIndexByStartEndDate($startDate: String, $endDate: String, $sportIds: [Int!], $limit: Int) {
+    meetingsGrouped(startDate: $startDate, endDate: $endDate, sportIds: $sportIds, limit: $limit) {
+      group
+      meetings {
+        ...meetingFragment
+        venue {
+          ...venueFragment
+        }
+        events {
+          ...eventResultsFragment
+          trackCondition {
+            ...trackConditionFragment
+          }
+          selections(topFour: true) {
+            ...selectionBaseFragment
+            competitor {
+              ...competitorBaseFragment
+            }
+            result {
+              finishPosition
+            }
+            odds {
+              ...oddsFragment
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  fragment meetingFragment on Meeting {
+    ...meetingBaseFragment
+    sportId
+    penetrometer
+    trackComments
+    tabStatus
+    meetingCategory
+    meetingStage
+    meetingType
+    totalPrizeMoney
+    state
+  }
+  
+  fragment meetingBaseFragment on Meeting {
+    id
+    name
+    slug
+    railPosition
+    timeGroup
+    meetingDateUtc
+    meetingDateLocal
+    regionId
+  }
+  
+  fragment venueFragment on Venue {
+    ...venueBaseFragment
+    isMetro
+    address
+    weatherLastUpdated
+    country {
+      id
+      name
+      iso2
+      iso3
+      horseCountry
+    }
+  }
+  
+  fragment venueBaseFragment on Venue {
+    id
+    name
+    nameAbbrev
+    slug
+    state
+  }
+  
+  fragment eventResultsFragment on Event {
+    ...eventBaseFragment
+    startTime
+    isResulted
+    resultState
+    isAbandoned
+    placeWinners
+    distance
+    eventClass
+    groupType
+  }
+  
+  fragment eventBaseFragment on Event {
+    id
+    racenetId
+    slug
+    name
+    nameNews
+    eventNumber
+    status
+    startTime
+    endTime
+    trackType
+  }
+  
+  fragment trackConditionFragment on TrackCondition {
+    eventId
+    overall
+    rating
+    surface
+  }
+  
+  fragment selectionBaseFragment on Selection {
+    id
+    racenetId
+    competitorNumber
+    barrierNumber
+    isEmergency
+    status
+    silkImageUrl
+    __typename
+  }
+  
+  fragment competitorBaseFragment on Competitor {
+    id
+    name
+    slug
+    smallImageUrl
+    isKeep
+  }
+  
+  fragment oddsFragment on Odd {
+    type
+    betType
+    bookmakerId
+    price {
+      value
+    }
+  }`;
+
+  // Define variables for the query
+  const variables = {
+    startDate: targetDate,
+    endDate: targetDate,
+    limit: 100
+  };
+
+  // URL encode the variables and query
+  const encodedVariables = encodeURIComponent(JSON.stringify(variables));
+  const encodedQuery = encodeURIComponent(query);
+
+  // The API endpoint URL with direct query
   const config = {
     method: 'get',
     maxBodyLength: Infinity,
-    url: `https://puntapi.com/graphql-horse-racing?operationName=meetingsIndexByStartEndDate&variables=%7B%22startDate%22%3A%22${targetDate}%22%2C%22endDate%22%3A%22${targetDate}%22%2C%22limit%22%3A100%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%220c0f74621a771c40cfff90635d94fef66c8ac7284bdaf10467fcd002c74f68cd%22%7D%7D`,
+    url: `https://puntapi.com/graphql-horse-racing?operationName=meetingsIndexByStartEndDate&variables=${encodedVariables}&query=${encodedQuery}`,
     headers: { 
       'accept': '*/*', 
       'accept-language': 'en-US,en;q=0.9,be;q=0.8,ar;q=0.7', 
@@ -89,6 +239,15 @@ const getMeetingsOnACertainDate = async (date) => {
           if (meeting.events && Array.isArray(meeting.events)) {
             meeting.events.forEach(event => {
               if (event && event.id) {
+                // Add __typename to selections if missing
+                if (event.selections && Array.isArray(event.selections)) {
+                  event.selections.forEach(selection => {
+                    if (!selection.__typename) {
+                      selection.__typename = "Selection";
+                    }
+                  });
+                }
+                
                 // Parse the selections data for this event
                 const parsedEvent = parseSelectionsData(event, event.id);
                 if (parsedEvent.selections.length > 0) {
