@@ -1,0 +1,54 @@
+<div class="row mb-4">
+  <div class="col-md-12">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item active">{{#if (eq type 'daily')}}Daily{{else}}Weekly{{/if}} Meetings - {{date}}</li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-12">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2>
+        {{#if (eq type 'daily')}}
+          Daily Meetings for {{date}}
+        {{else}}
+          Weekly Meetings for {{date}}
+        {{/if}}
+      </h2>
+      <a href="/" class="btn btn-outline-secondary">Back to Dashboard</a>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  {{#if meetings.length}}
+    {{#each meetings}}
+      <div class="col-md-4 mb-4">
+        <div class="card meeting-card h-100">
+          <div class="card-header {{#if (eq ../type 'daily')}}bg-primary{{else}}bg-success{{/if}} text-white">
+            <h5 class="mb-0">{{this.name}}</h5>
+          </div>
+          <div class="card-body">
+            <p class="card-text mb-1"><strong>Last Updated:</strong> {{formatDate this.lastModified}}</p>
+            <p class="card-text"><strong>File Size:</strong> {{formatFileSize this.size}}</p>
+          </div>
+          <div class="card-footer bg-transparent">
+            <a href="/download/{{../type}}/{{../date}}/{{this.name}}" class="btn {{#if (eq ../type 'daily')}}btn-primary{{else}}btn-success{{/if}}">
+              <i class="bi bi-download"></i> Download
+            </a>
+          </div>
+        </div>
+      </div>
+    {{/each}}
+  {{else}}
+    <div class="col-12">
+      <div class="alert alert-warning">
+        No meetings found for this date.
+      </div>
+    </div>
+  {{/if}}
+</div> 
