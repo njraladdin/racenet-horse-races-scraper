@@ -33,29 +33,37 @@ function formatFormsData(results) {
       
       // Process each form entry for this selection
       selection.forms.forEach(form => {
+        // Create a clean copy of the form data without the fields we'll handle separately
+        const formDataCopy = { ...form };
+        
+        // Remove fields that we'll handle separately to avoid duplication
+        const fieldsToRemove = ['Horse Name', 'Selection ID'];
+        fieldsToRemove.forEach(field => {
+          delete formDataCopy[field];
+        });
+
         // Create a formatted data object with meeting, event, and selection info
         const formattedEntry = {
           // Meeting data
           meetingId: meetingInfo.id || '',
           meetingName: meetingInfo.name || '',
-          meetingState: meetingInfo.state || '',
           meetingSlug: meetingInfo.slug || '',
           
           // Event data
           eventId: event.id,
           eventNumber: event.eventNumber,
-          eventName: event.name || '',
+        //  eventName: event.name || '',
           eventSlug: event.slug || '',
           eventDistance: event.distance || '',
           eventClass: event.eventClass || '',
           
-          // Selection data
+          // Selection data - use canonical naming conventions
           selectionId: selectionId,
-          selectionNumber: selection.number || '',
+        //  selectionNumber: selection.number || '',
           horseName: selection.name || form["Horse Name"] || '',
           
-          // Form data - include all properties from the form
-          ...form
+          // Form data - include all properties from the clean form copy
+          ...formDataCopy
         };
         
         formattedData.push(formattedEntry);

@@ -10,23 +10,39 @@ const logger = createLogger({ timestamps: true, debug: false });
  * Parse forms data for selections
  * @param {Object} data - Raw data from API
  * @param {Array} selectionIds - Selection IDs for logging purposes
- * @returns {Object} Object containing parsed forms data
+ * @returns {Object} Object containing forms data grouped by selectionId
  */
 function parseFormsData(data, selectionIds) {
   logger.info(`Parsing forms data for ${selectionIds.length} selections`);
   
   if (!data || !data.data) {
     logger.error(`INVALID API RESPONSE for selections: ${selectionIds.join(', ')} - Missing data structure`);
-    return { forms: [] };
+    return {};
   }
   
   // Use the parseCompetitorForms function to parse the data
   const parsedForms = parseCompetitorForms(data);
   
-  // Return the parsed forms in the expected structure
-  return {
-    forms: parsedForms
-  };
+  // Group forms by selectionId
+  const formsBySelectionId = {};
+  
+  // Iterate through competitorForms to get selectionIds
+  if (data.data.competitorForms && Array.isArray(data.data.competitorForms)) {
+    data.data.competitorForms.forEach(competitorForm => {
+      const selectionId = competitorForm.selectionId;
+      
+      // Find all forms for this selectionId
+      const formsForSelection = parsedForms.filter(form => 
+        form["Selection ID"] === selectionId
+      );
+      
+      if (formsForSelection.length > 0) {
+        formsBySelectionId[selectionId] = formsForSelection;
+      }
+    });
+  }
+  
+  return formsBySelectionId;
 }
 
 /**
@@ -276,7 +292,7 @@ function saveDebugFile(data, filename) {
  * Get form data for specific selections
  * @param {Array} selectionIds - Array of selection IDs
  * @param {number} limit - Maximum number of form entries to retrieve (default: 5)
- * @returns {Promise<Object>} Object containing raw response and parsed form data
+ * @returns {Promise<Object>} Object containing parsed form data grouped by selectionId
  */
 async function getSelectionsForms(selectionIds, limit = 5) {
   // Define the GraphQL query
@@ -536,11 +552,8 @@ async function getSelectionsForms(selectionIds, limit = 5) {
       saveDebugFile(parsedData, `${filename}_parsed.json`);
     }
 
-    // Return both raw response and parsed data
-    return {
-      rawResponse,
-      parsedData
-    };
+    // Return parsed data directly
+    return parsedData;
 
   } catch (error) {
     logger.error('Error fetching or parsing forms data:', error);
@@ -559,10 +572,9 @@ const test = async () => {
   try {
     // Example selection IDs from the user's query
     const sampleSelectionIds = ["19300785","19300858","19300865","19300866","19300868","19300850","19300840","19300816","19300852","19300806","19300876","19300804","19300822","19300812","19300872"];
-    const { parsedData } = await getSelectionsForms(sampleSelectionIds);
-    logger.info('Parsed Data:');
-    logger.info(JSON.stringify(parsedData, null, 2));
-    console.log(parsedData)
+    const result = await getSelectionsForms(sampleSelectionIds);
+    logger.info(`Retrieved form data for ${Object.keys(result).length} selections`);
+    console.log(result);
   } catch (error) {
     logger.error('Test function failed:', error);
   }

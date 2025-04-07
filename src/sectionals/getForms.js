@@ -14,7 +14,7 @@ const { getSelectionsForms } = require('./getSelectionsForms');
 const { createLogger } = require('../utils');
 
 // Create an enhanced logger
-const logger = createLogger({ timestamps: true, debug: true });
+const logger = createLogger({ timestamps: true, debug: false });
 
 
 /**
@@ -224,34 +224,21 @@ async function getForms(
               const formsData = await getSelectionsForms(selectionIds, formsLimit);
               
               // Add forms data to each selection
-              if (formsData && formsData.parsedData && formsData.parsedData.forms) {
-                logger.debug(`Received ${formsData.parsedData.forms.length} forms for event ${event.id}`);
-                logger.debug(`Available selection IDs in results: ${Object.keys(results.selections).join(', ')}`);
-                
-                // Group the forms by selection ID
-                const formsBySelection = {};
-                
-                formsData.parsedData.forms.forEach(form => {
-                  const selectionId = form["Selection ID"];
-                  if (selectionId) {
-                    if (!formsBySelection[selectionId]) {
-                      formsBySelection[selectionId] = [];
-                    }
-                    formsBySelection[selectionId].push(form);
-                    logger.debug(`Form for selection ID ${selectionId}: ${JSON.stringify(form)}`);
-                  }
-                });
+              if (formsData) {
+                logger.debug(`Received forms data for ${Object.keys(formsData).length} selections in event ${event.id}`);
                 
                 // Add the forms to each selection
-                for (const selectionId in formsBySelection) {
+                for (const selectionId in formsData) {
                   if (results.selections[selectionId]) {
-                    results.selections[selectionId].forms = formsBySelection[selectionId];
-                    logger.debug(`Added ${formsBySelection[selectionId].length} forms for selection ${selectionId}`);
+                    results.selections[selectionId].forms = formsData[selectionId];
+                    logger.debug(`Added ${formsData[selectionId].length} forms for selection ${selectionId}`);
                   } else {
                     logger.debug(`Selection ID ${selectionId} not found in results.selections`);
                     logger.debug(`Available selection IDs: ${Object.keys(results.selections).join(', ')}`);
                   }
                 }
+              } else {
+                logger.warn(`No forms data returned for event ${event.id}`);
               }
               
               const processedSelections = Object.keys(results.selections).filter(
