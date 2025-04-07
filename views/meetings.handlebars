@@ -3,7 +3,14 @@
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="/">Home</a></li>
-        <li class="breadcrumb-item active">{{#if (eq type 'daily')}}Daily{{else}}Weekly{{/if}} Meetings - {{date}}</li>
+        <li class="breadcrumb-item active">
+          {{#if (eq type 'daily')}}Daily Sectional
+          {{else if (eq type 'weekly')}}Historical Sectional
+          {{else if (eq type 'forms-daily')}}Daily Forms
+          {{else if (eq type 'forms-weekly')}}Historical Forms
+          {{/if}}
+          Meetings - {{date}}
+        </li>
       </ol>
     </nav>
   </div>
@@ -14,9 +21,13 @@
     <div class="d-flex justify-content-between align-items-center">
       <h2>
         {{#if (eq type 'daily')}}
-          Daily Meetings for {{date}}
-        {{else}}
-          Weekly Meetings for {{date}}
+          Daily Sectional Meetings for {{date}}
+        {{else if (eq type 'weekly')}}
+          Historical Sectional Meetings for {{date}}
+        {{else if (eq type 'forms-daily')}}
+          Daily Forms Meetings for {{date}}
+        {{else if (eq type 'forms-weekly')}}
+          Historical Forms Meetings for {{date}}
         {{/if}}
       </h2>
       <a href="/" class="btn btn-outline-secondary">Back to Dashboard</a>
@@ -29,7 +40,12 @@
     {{#each meetings}}
       <div class="col-md-4 mb-4">
         <div class="card meeting-card h-100">
-          <div class="card-header {{#if (eq ../type 'daily')}}bg-primary{{else}}bg-success{{/if}} text-white">
+          <div class="card-header 
+            {{#if (eq ../type 'daily')}}bg-primary{{/if}}
+            {{#if (eq ../type 'weekly')}}bg-success{{/if}}
+            {{#if (eq ../type 'forms-daily')}}bg-primary{{/if}}
+            {{#if (eq ../type 'forms-weekly')}}bg-success{{/if}} 
+            text-white">
             <h5 class="mb-0">{{this.name}}</h5>
           </div>
           <div class="card-body">
@@ -37,7 +53,11 @@
             <p class="card-text"><strong>File Size:</strong> {{formatFileSize this.size}}</p>
           </div>
           <div class="card-footer bg-transparent">
-            <a href="/download/{{../type}}/{{../date}}/{{this.name}}" class="btn {{#if (eq ../type 'daily')}}btn-primary{{else}}btn-success{{/if}}">
+            <a href="/download/{{../type}}/{{../date}}/{{this.name}}" class="btn 
+              {{#if (eq ../type 'daily')}}btn-primary{{/if}}
+              {{#if (eq ../type 'weekly')}}btn-success{{/if}}
+              {{#if (eq ../type 'forms-daily')}}btn-primary{{/if}}
+              {{#if (eq ../type 'forms-weekly')}}btn-success{{/if}}">
               <i class="bi bi-download"></i> Download
             </a>
           </div>

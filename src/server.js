@@ -46,10 +46,18 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 // Base data directories
 const DATA_DIR = path.join(__dirname, '../data');
+
+// Sectional data directories
 const DAILY_JSON_DIR = path.join(DATA_DIR, 'output_json_daily');
 const DAILY_CSV_DIR = path.join(DATA_DIR, 'output_csv_daily');
 const HISTORICAL_JSON_DIR = path.join(DATA_DIR, 'output_json_historical');
 const HISTORICAL_CSV_DIR = path.join(DATA_DIR, 'output_csv_historical');
+
+// Forms data directories
+const FORMS_DAILY_JSON_DIR = path.join(DATA_DIR, 'output_forms_json_daily');
+const FORMS_DAILY_CSV_DIR = path.join(DATA_DIR, 'output_forms_csv_daily');
+const FORMS_HISTORICAL_JSON_DIR = path.join(DATA_DIR, 'output_forms_json_historical');
+const FORMS_HISTORICAL_CSV_DIR = path.join(DATA_DIR, 'output_forms_csv_historical');
 
 // Helper function to get all dates with meetings
 function getDatesWithMeetings(baseDir) {
@@ -130,11 +138,15 @@ async function createZipFromDirectory(dirPath, zipName) {
 
 // Main dashboard route
 app.get('/', (req, res) => {
-  // Get all available dates
+  // Get all available dates for sectional data
   const dailyDates = getDatesWithMeetings(DAILY_CSV_DIR);
   const historicalDates = getDatesWithMeetings(HISTORICAL_CSV_DIR);
   
-  // Get the most recent date's meetings (if available)
+  // Get all available dates for forms data
+  const formsDailyDates = getDatesWithMeetings(FORMS_DAILY_CSV_DIR);
+  const formsHistoricalDates = getDatesWithMeetings(FORMS_HISTORICAL_CSV_DIR);
+  
+  // Get the most recent date's meetings for sectional data
   const latestDailyMeetings = dailyDates.length > 0 
     ? getMeetingsForDate(DAILY_CSV_DIR, dailyDates[0])
     : [];
@@ -143,13 +155,31 @@ app.get('/', (req, res) => {
     ? getMeetingsForDate(HISTORICAL_CSV_DIR, historicalDates[0])
     : [];
   
+  // Get the most recent date's meetings for forms data
+  const latestFormsDailyMeetings = formsDailyDates.length > 0 
+    ? getMeetingsForDate(FORMS_DAILY_CSV_DIR, formsDailyDates[0])
+    : [];
+  
+  const latestFormsHistoricalMeetings = formsHistoricalDates.length > 0
+    ? getMeetingsForDate(FORMS_HISTORICAL_CSV_DIR, formsHistoricalDates[0])
+    : [];
+  
   res.render('dashboard', {
+    // Sectional data
     dailyDates,
     weeklyDates: historicalDates,
     latestDailyDate: dailyDates[0] || null,
     latestWeeklyDate: historicalDates[0] || null,
     latestDailyMeetings,
-    latestWeeklyMeetings: latestHistoricalMeetings
+    latestWeeklyMeetings: latestHistoricalMeetings,
+    
+    // Forms data
+    formsDailyDates,
+    formsWeeklyDates: formsHistoricalDates,
+    latestFormsDailyDate: formsDailyDates[0] || null,
+    latestFormsWeeklyDate: formsHistoricalDates[0] || null,
+    latestFormsDailyMeetings,
+    latestFormsWeeklyMeetings: latestFormsHistoricalMeetings
   });
 });
 
@@ -167,10 +197,44 @@ app.get('/api/weekly/:date', (req, res) => {
   res.json(formatMeetingsForApi(meetings));
 });
 
+// API route to get forms daily meetings for a specific date
+app.get('/api/forms-daily/:date', (req, res) => {
+  const date = req.params.date;
+  const meetings = getMeetingsForDate(FORMS_DAILY_CSV_DIR, date);
+  res.json(formatMeetingsForApi(meetings));
+});
+
+// API route to get forms historical meetings for a specific date
+app.get('/api/forms-weekly/:date', (req, res) => {
+  const date = req.params.date;
+  const meetings = getMeetingsForDate(FORMS_HISTORICAL_CSV_DIR, date);
+  res.json(formatMeetingsForApi(meetings));
+});
+
 // Route to download a file
 app.get('/download/:type/:date/:filename', (req, res) => {
   const { type, date, filename } = req.params;
-  const baseDir = type === 'daily' ? DAILY_CSV_DIR : HISTORICAL_CSV_DIR;
+  
+  let baseDir;
+  
+  // Determine the appropriate directory based on type
+  switch (type) {
+    case 'daily':
+      baseDir = DAILY_CSV_DIR;
+      break;
+    case 'weekly':
+      baseDir = HISTORICAL_CSV_DIR;
+      break;
+    case 'forms-daily':
+      baseDir = FORMS_DAILY_CSV_DIR;
+      break;
+    case 'forms-weekly':
+      baseDir = FORMS_HISTORICAL_CSV_DIR;
+      break;
+    default:
+      return res.status(400).send('Invalid type specified');
+  }
+  
   const filePath = path.join(baseDir, date, filename);
   
   if (fs.existsSync(filePath)) {
@@ -184,7 +248,27 @@ app.get('/download/:type/:date/:filename', (req, res) => {
 app.get('/download-day/:type/:date', async (req, res) => {
   try {
     const { type, date } = req.params;
-    const baseDir = type === 'daily' ? DAILY_CSV_DIR : HISTORICAL_CSV_DIR;
+    
+    let baseDir;
+    
+    // Determine the appropriate directory based on type
+    switch (type) {
+      case 'daily':
+        baseDir = DAILY_CSV_DIR;
+        break;
+      case 'weekly':
+        baseDir = HISTORICAL_CSV_DIR;
+        break;
+      case 'forms-daily':
+        baseDir = FORMS_DAILY_CSV_DIR;
+        break;
+      case 'forms-weekly':
+        baseDir = FORMS_HISTORICAL_CSV_DIR;
+        break;
+      default:
+        return res.status(400).send('Invalid type specified');
+    }
+    
     const dirPath = path.join(baseDir, date);
     
     if (!fs.existsSync(dirPath)) {
@@ -224,7 +308,26 @@ app.get('/download-day/:type/:date', async (req, res) => {
 app.get('/download-all/:type', async (req, res) => {
   try {
     const { type } = req.params;
-    const baseDir = type === 'daily' ? DAILY_CSV_DIR : HISTORICAL_CSV_DIR;
+    
+    let baseDir;
+    
+    // Determine the appropriate directory based on type
+    switch (type) {
+      case 'daily':
+        baseDir = DAILY_CSV_DIR;
+        break;
+      case 'weekly':
+        baseDir = HISTORICAL_CSV_DIR;
+        break;
+      case 'forms-daily':
+        baseDir = FORMS_DAILY_CSV_DIR;
+        break;
+      case 'forms-weekly':
+        baseDir = FORMS_HISTORICAL_CSV_DIR;
+        break;
+      default:
+        return res.status(400).send('Invalid type specified');
+    }
     
     if (!fs.existsSync(baseDir)) {
       return res.status(404).send('Data directory not found');

@@ -1,10 +1,146 @@
-<h3 class="mb-3">Horse Racing Sectional Data</h3>
+<h3 class="mb-3">Horse Racing Data</h3>
 
-<!-- Daily Scraper Section -->
+<!-- Daily Forms Section -->
 <div class="card mb-4">
   <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-    <h5 class="mb-0">Daily Scraper Data</h5>
-    <a href="/download-all/daily" class="btn btn-sm btn-light">Download All Daily Data</a>
+    <h5 class="mb-0">Daily Forms Data</h5>
+    <a href="/download-all/forms-daily" class="btn btn-sm btn-light">Download All Daily Forms</a>
+  </div>
+  <div class="card-body">
+    {{#if formsDailyDates.length}}
+      <div class="row">
+        <!-- Dates sidebar -->
+        <div class="col-md-3 mb-3">
+          <label for="forms-daily-dates"><strong>Available Dates:</strong></label>
+          <div class="list-group date-list" id="forms-daily-dates">
+            {{#each formsDailyDates}}
+              <a href="#" class="list-group-item list-group-item-action forms-daily-date date-selector {{#if (eq this ../latestFormsDailyDate)}}active{{/if}}" 
+                 data-type="forms-daily" 
+                 data-date="{{this}}">
+                {{this}}
+              </a>
+            {{/each}}
+          </div>
+        </div>
+        <!-- Meetings table -->
+        <div class="col-md-9">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <label id="forms-daily-heading"><strong>Meetings for {{latestFormsDailyDate}}:</strong></label>
+            {{#if latestFormsDailyDate}}
+              <a href="/download-day/forms-daily/{{latestFormsDailyDate}}" class="btn btn-sm btn-primary">Download Day as ZIP</a>
+            {{/if}}
+          </div>
+          <div id="forms-daily-meetings">
+            {{#if latestFormsDailyMeetings.length}}
+              <div class="table-responsive">
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>Meeting</th>
+                      <th>Last Updated</th>
+                      <th>Size</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {{#each latestFormsDailyMeetings}}
+                      <tr>
+                        <td>{{this.name}}</td>
+                        <td>{{formatDate this.lastModified}}</td>
+                        <td>{{formatFileSize this.size}}</td>
+                        <td>
+                          <a href="/download/forms-daily/{{../latestFormsDailyDate}}/{{this.name}}" class="btn btn-sm btn-primary">Download</a>
+                        </td>
+                      </tr>
+                    {{/each}}
+                  </tbody>
+                </table>
+              </div>
+            {{else}}
+              <div class="alert alert-info">No meetings available for this date.</div>
+            {{/if}}
+          </div>
+        </div>
+      </div>
+    {{else}}
+      <div class="alert alert-info">No forms data has been scraped yet.</div>
+    {{/if}}
+  </div>
+</div>
+
+<!-- Historical Forms Data Section -->
+<div class="card mb-4">
+  <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">Historical Forms Data</h5>
+    <a href="/download-all/forms-weekly" class="btn btn-sm btn-light">Download All Historical Forms</a>
+  </div>
+  <div class="card-body">
+    {{#if formsWeeklyDates.length}}
+      <div class="row">
+        <!-- Dates sidebar -->
+        <div class="col-md-3 mb-3">
+          <label for="forms-weekly-dates"><strong>Available Dates:</strong></label>
+          <div class="list-group date-list" id="forms-weekly-dates">
+            {{#each formsWeeklyDates}}
+              <a href="#" class="list-group-item list-group-item-action forms-weekly-date date-selector {{#if (eq this ../latestFormsWeeklyDate)}}active{{/if}}" 
+                 data-type="forms-weekly" 
+                 data-date="{{this}}">
+                {{this}}
+              </a>
+            {{/each}}
+          </div>
+        </div>
+        <!-- Meetings table -->
+        <div class="col-md-9">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <label id="forms-weekly-heading"><strong>Meetings for {{latestFormsWeeklyDate}}:</strong></label>
+            {{#if latestFormsWeeklyDate}}
+              <a href="/download-day/forms-weekly/{{latestFormsWeeklyDate}}" class="btn btn-sm btn-success">Download Day as ZIP</a>
+            {{/if}}
+          </div>
+          <div id="forms-weekly-meetings">
+            {{#if latestFormsWeeklyMeetings.length}}
+              <div class="table-responsive">
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>Meeting</th>
+                      <th>Last Updated</th>
+                      <th>Size</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {{#each latestFormsWeeklyMeetings}}
+                      <tr>
+                        <td>{{this.name}}</td>
+                        <td>{{formatDate this.lastModified}}</td>
+                        <td>{{formatFileSize this.size}}</td>
+                        <td>
+                          <a href="/download/forms-weekly/{{../latestFormsWeeklyDate}}/{{this.name}}" class="btn btn-sm btn-success">Download</a>
+                        </td>
+                      </tr>
+                    {{/each}}
+                  </tbody>
+                </table>
+              </div>
+            {{else}}
+              <div class="alert alert-info">No meetings available for this date.</div>
+            {{/if}}
+          </div>
+        </div>
+      </div>
+    {{else}}
+      <div class="alert alert-info">No forms data has been scraped yet.</div>
+    {{/if}}
+  </div>
+</div>
+
+<!-- Daily Sectional Data Section -->
+<div class="card mb-4">
+  <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">Daily Sectional Data</h5>
+    <a href="/download-all/daily" class="btn btn-sm btn-light">Download All Daily Sectional Data</a>
   </div>
   <div class="card-body">
     {{#if dailyDates.length}}
@@ -68,11 +204,11 @@
   </div>
 </div>
 
-<!-- Weekly Scraper Section -->
+<!-- Historical Sectional Data Section -->
 <div class="card mb-4">
   <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-    <h5 class="mb-0">Historical Data</h5>
-    <a href="/download-all/weekly" class="btn btn-sm btn-light">Download All Historical Data</a>
+    <h5 class="mb-0">Historical Sectional Data</h5>
+    <a href="/download-all/weekly" class="btn btn-sm btn-light">Download All Historical Sectional Data</a>
   </div>
   <div class="card-body">
     {{#if weeklyDates.length}}
