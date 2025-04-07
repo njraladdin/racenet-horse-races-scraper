@@ -209,7 +209,7 @@ const parseCompetitorForms = (jsonData) => {
 
       const output = {
         "Horse Name": horseName,
-        "Selection ID": form.selection?.id || '',
+        "Selection ID": competitorForm.selectionId || form.selection?.id || '',
         "Result": `${form.finishPosition ?? '?'} of ${form.eventStarters ?? '?'}`,
         "Margin": formatMargin(form.margin),
         "Date of race": formatDate(form.meetingDate),
@@ -558,10 +558,11 @@ module.exports = {
 const test = async () => {
   try {
     // Example selection IDs from the user's query
-    const sampleSelectionIds = ["19300336","19300349","19300358","19300364","19300376","19300405","19300422","19300432","19300451","19300372","19300347","19300380","19300455","19300428","19300446","19300329","19300436","19300449"];
+    const sampleSelectionIds = ["19300785","19300858","19300865","19300866","19300868","19300850","19300840","19300816","19300852","19300806","19300876","19300804","19300822","19300812","19300872"];
     const { parsedData } = await getSelectionsForms(sampleSelectionIds);
     logger.info('Parsed Data:');
     logger.info(JSON.stringify(parsedData, null, 2));
+    console.log(parsedData)
   } catch (error) {
     logger.error('Test function failed:', error);
   }
