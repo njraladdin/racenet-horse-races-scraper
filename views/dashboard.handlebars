@@ -2,9 +2,8 @@
 
 <!-- Daily Forms Section -->
 <div class="card mb-4">
-  <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+  <div class="card-header bg-primary text-white">
     <h5 class="mb-0">Daily Forms Data</h5>
-    <a href="/download-all/forms-daily" class="btn btn-sm btn-light">Download All Daily Forms</a>
   </div>
   <div class="card-body">
     {{#if formsDailyDates.length}}
@@ -26,9 +25,6 @@
         <div class="col-md-9">
           <div class="d-flex justify-content-between align-items-center mb-2">
             <label id="forms-daily-heading"><strong>Meetings for {{latestFormsDailyDate}}:</strong></label>
-            {{#if latestFormsDailyDate}}
-              <a href="/download-day/forms-daily/{{latestFormsDailyDate}}" class="btn btn-sm btn-primary">Download Day as ZIP</a>
-            {{/if}}
           </div>
           <div id="forms-daily-meetings">
             {{#if latestFormsDailyMeetings.length}}
@@ -70,9 +66,8 @@
 
 <!-- Historical Forms Data Section -->
 <div class="card mb-4">
-  <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+  <div class="card-header bg-success text-white">
     <h5 class="mb-0">Historical Forms Data</h5>
-    <a href="/download-all/forms-weekly" class="btn btn-sm btn-light">Download All Historical Forms</a>
   </div>
   <div class="card-body">
     {{#if formsWeeklyDates.length}}
@@ -94,9 +89,6 @@
         <div class="col-md-9">
           <div class="d-flex justify-content-between align-items-center mb-2">
             <label id="forms-weekly-heading"><strong>Meetings for {{latestFormsWeeklyDate}}:</strong></label>
-            {{#if latestFormsWeeklyDate}}
-              <a href="/download-day/forms-weekly/{{latestFormsWeeklyDate}}" class="btn btn-sm btn-success">Download Day as ZIP</a>
-            {{/if}}
           </div>
           <div id="forms-weekly-meetings">
             {{#if latestFormsWeeklyMeetings.length}}
@@ -138,9 +130,8 @@
 
 <!-- Daily Sectional Data Section -->
 <div class="card mb-4">
-  <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+  <div class="card-header bg-primary text-white">
     <h5 class="mb-0">Daily Sectional Data</h5>
-    <a href="/download-all/daily" class="btn btn-sm btn-light">Download All Daily Sectional Data</a>
   </div>
   <div class="card-body">
     {{#if dailyDates.length}}
@@ -162,9 +153,6 @@
         <div class="col-md-9">
           <div class="d-flex justify-content-between align-items-center mb-2">
             <label id="daily-heading"><strong>Meetings for {{latestDailyDate}}:</strong></label>
-            {{#if latestDailyDate}}
-              <a href="/download-day/daily/{{latestDailyDate}}" class="btn btn-sm btn-primary">Download Day as ZIP</a>
-            {{/if}}
           </div>
           <div id="daily-meetings">
             {{#if latestDailyMeetings.length}}
@@ -206,9 +194,8 @@
 
 <!-- Historical Sectional Data Section -->
 <div class="card mb-4">
-  <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+  <div class="card-header bg-success text-white">
     <h5 class="mb-0">Historical Sectional Data</h5>
-    <a href="/download-all/weekly" class="btn btn-sm btn-light">Download All Historical Sectional Data</a>
   </div>
   <div class="card-body">
     {{#if weeklyDates.length}}
@@ -230,9 +217,6 @@
         <div class="col-md-9">
           <div class="d-flex justify-content-between align-items-center mb-2">
             <label id="weekly-heading"><strong>Meetings for {{latestWeeklyDate}}:</strong></label>
-            {{#if latestWeeklyDate}}
-              <a href="/download-day/weekly/{{latestWeeklyDate}}" class="btn btn-sm btn-success">Download Day as ZIP</a>
-            {{/if}}
           </div>
           <div id="weekly-meetings">
             {{#if latestWeeklyMeetings.length}}

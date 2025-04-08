@@ -10,7 +10,6 @@
     "scrape:historical:days": "node src/scrapeHistoricalData.js --days-back="
   },
   "dependencies": {
-    "adm-zip": "^0.5.16",
     "axios": "^1.8.4",
     "cheerio": "^1.0.0",
     "cli-color": "^2.0.4",

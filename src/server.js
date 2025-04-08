@@ -3,7 +3,6 @@ const path = require('path');
 const fs = require('fs');
 const moment = require('moment-timezone');
 const exphbs = require('express-handlebars');
-const AdmZip = require('adm-zip');
 
 // Create Express app
 const app = express();
@@ -100,40 +99,6 @@ function formatMeetingsForApi(meetings) {
     sizeFormatted: formatFileSize(meeting.size),
     lastModifiedFormatted: formatDate(meeting.lastModified)
   }));
-}
-
-// Helper function to create a zip archive for a directory
-async function createZipFromDirectory(dirPath, zipName) {
-  try {
-    const zip = new AdmZip();
-    
-    if (!fs.existsSync(dirPath)) {
-      throw new Error(`Directory does not exist: ${dirPath}`);
-    }
-    
-    const items = fs.readdirSync(dirPath);
-    if (items.length === 0) {
-      throw new Error(`Directory is empty: ${dirPath}`);
-    }
-    
-    // Add directory to zip
-    zip.addLocalFolder(dirPath, path.basename(dirPath));
-    
-    // Create temp directory if it doesn't exist
-    const tempDir = path.join(DATA_DIR, 'temp');
-    if (!fs.existsSync(tempDir)) {
-      fs.mkdirSync(tempDir, { recursive: true });
-    }
-    
-    // Save zip to temp directory
-    const zipPath = path.join(tempDir, zipName);
-    zip.writeZip(zipPath);
-    
-    return zipPath;
-  } catch (error) {
-    console.error('Error creating zip file:', error);
-    throw error;
-  }
 }
 
 // Main dashboard route
@@ -241,124 +206,6 @@ app.get('/download/:type/:date/:filename', (req, res) => {
     res.download(filePath);
   } else {
     res.status(404).send('File not found');
-  }
-});
-
-// Route to download a whole day's data as zip
-app.get('/download-day/:type/:date', async (req, res) => {
-  try {
-    const { type, date } = req.params;
-    
-    let baseDir;
-    
-    // Determine the appropriate directory based on type
-    switch (type) {
-      case 'daily':
-        baseDir = DAILY_CSV_DIR;
-        break;
-      case 'weekly':
-        baseDir = HISTORICAL_CSV_DIR;
-        break;
-      case 'forms-daily':
-        baseDir = FORMS_DAILY_CSV_DIR;
-        break;
-      case 'forms-weekly':
-        baseDir = FORMS_HISTORICAL_CSV_DIR;
-        break;
-      default:
-        return res.status(400).send('Invalid type specified');
-    }
-    
-    const dirPath = path.join(baseDir, date);
-    
-    if (!fs.existsSync(dirPath)) {
-      return res.status(404).send('Date directory not found');
-    }
-    
-    const zipName = `${type}-${date}.zip`;
-    const zipPath = await createZipFromDirectory(dirPath, zipName);
-    
-    // Get the file stats for content-length
-    const stats = fs.statSync(zipPath);
-    
-    // Set headers
-    res.setHeader('Content-Type', 'application/zip');
-    res.setHeader('Content-Disposition', `attachment; filename=${zipName}`);
-    res.setHeader('Content-Length', stats.size);
-    
-    // Stream the file instead of using res.download
-    const fileStream = fs.createReadStream(zipPath);
-    fileStream.pipe(res);
-    
-    // Clean up the temporary zip file after download
-    fileStream.on('close', () => {
-      setTimeout(() => {
-        if (fs.existsSync(zipPath)) {
-          fs.unlinkSync(zipPath);
-        }
-      }, 5000);
-    });
-  } catch (error) {
-    console.error('Error in download-day:', error);
-    res.status(500).send('Error creating zip file');
-  }
-});
-
-// Route to download all data for a type as zip
-app.get('/download-all/:type', async (req, res) => {
-  try {
-    const { type } = req.params;
-    
-    let baseDir;
-    
-    // Determine the appropriate directory based on type
-    switch (type) {
-      case 'daily':
-        baseDir = DAILY_CSV_DIR;
-        break;
-      case 'weekly':
-        baseDir = HISTORICAL_CSV_DIR;
-        break;
-      case 'forms-daily':
-        baseDir = FORMS_DAILY_CSV_DIR;
-        break;
-      case 'forms-weekly':
-        baseDir = FORMS_HISTORICAL_CSV_DIR;
-        break;
-      default:
-        return res.status(400).send('Invalid type specified');
-    }
-    
-    if (!fs.existsSync(baseDir)) {
-      return res.status(404).send('Data directory not found');
-    }
-    
-    const zipName = `all-${type}-data.zip`;
-    const zipPath = await createZipFromDirectory(baseDir, zipName);
-    
-    // Get the file stats for content-length
-    const stats = fs.statSync(zipPath);
-    
-    // Set headers
-    res.setHeader('Content-Type', 'application/zip');
-    res.setHeader('Content-Disposition', `attachment; filename=${zipName}`);
-    res.setHeader('Content-Length', stats.size);
-    
-    // Stream the file instead of using res.download
-    const fileStream = fs.createReadStream(zipPath);
-    fileStream.pipe(res);
-    
-    // Clean up the temporary zip file after download
-    fileStream.on('close', () => {
-      setTimeout(() => {
-        if (fs.existsSync(zipPath)) {
-          fs.unlinkSync(zipPath);
-        }
-      }, 5000);
-    });
-  } catch (error) {
-    console.error('Error in download-all:', error);
-    res.status(500).send('Error creating zip file');
   }
 });
 

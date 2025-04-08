@@ -49,22 +49,6 @@
         loadingOverlay.style.display = 'none';
       }
       
-      // Add loading indicator for all zip download links
-      document.querySelectorAll('a[href*="/download-day/"], a[href*="/download-all/"]').forEach(link => {
-        link.addEventListener('click', function(e) {
-          // Don't show loading for right-clicks (context menu)
-          if (e.button !== 2 && !e.ctrlKey) {
-            const isAllData = this.getAttribute('href').includes('/download-all/');
-            const message = isAllData ? 'Creating ZIP archive of all data...' : 'Creating ZIP archive of this day...';
-            showLoading(message);
-            
-            // Hide loading after a timeout even if download doesn't start
-            // This is a fallback in case something goes wrong
-            setTimeout(hideLoading, 30000);
-          }
-        });
-      });
-      
       // Handle date selection
       document.querySelectorAll('.date-selector').forEach(function(dateLink) {
         dateLink.addEventListener('click', async function(e) {
@@ -77,20 +61,6 @@
           const headingElement = document.getElementById(`${type}-heading`);
           if (headingElement) {
             headingElement.textContent = `Meetings for ${date}:`;
-          }
-          
-          // Update download day button
-          const downloadDayBtn = headingElement.parentElement.querySelector('.btn');
-          if (downloadDayBtn) {
-            downloadDayBtn.href = `/download-day/${type}/${date}`;
-            
-            // Make sure the new button also has the loading handler
-            downloadDayBtn.onclick = function(e) {
-              if (e.button !== 2 && !e.ctrlKey) {
-                showLoading('Creating ZIP archive of this day...');
-                setTimeout(hideLoading, 30000); // Safety timeout
-              }
-            };
           }
           
           // Set active class
