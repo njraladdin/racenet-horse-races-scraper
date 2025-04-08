@@ -155,8 +155,8 @@ async function extractHistoricalFormsData() {
               "punters", 
               "HorseRacing", 
               null,
-              5, // Default concurrency
-              5, // Default forms limit
+              1, // Default concurrency
+              16, // Default forms limit
               eventSelections
             );
             
